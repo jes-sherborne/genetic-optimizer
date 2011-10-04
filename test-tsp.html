@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genetic Optimizer Test 1</title>
+</head>
+<script type="text/javascript" src="external/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="external/highcharts.js"></script>
+<script type="text/javascript" src="genetic-optimizer.js"></script>
+<script type="text/javascript" src="tsp-function.js"></script>
+<script type="text/javascript" src="sample-without-replacement.js"></script>
+
+<script type="text/javascript">
+    var iterationChart, tourChart;
+
+    function updateStatus(status) {
+        iterationChart.series[0].addPoint([status.iteration, status.populationMin]);
+        iterationChart.series[1].addPoint([status.iteration, status.populationMean]);
+        iterationChart.series[2].addPoint([status.iteration, status.populationMax]);
+    }
+
+    function Optimize() {
+        var optimizer, result, optimizerOptions, nodeList, i;
+
+        nodeList = [];
+        for (i = 0; i < 55; i++) {
+            nodeList.push({
+                x: 100 * Math.random(),
+                y: 100 * Math.random()
+            });
+        }
+
+        optimizerOptions = {
+            combinatorialFunction: new SimpleTSP({
+                nodeList: nodeList
+            }),
+            objective: "minimize",
+            statusCallback: updateStatus
+        };
+
+        // Copy inputs from the form
+        $("input").each(function(index, element) {
+            optimizerOptions[$(element).attr("id")] = $(element).val();
+        });
+
+        optimizer = new GeneticOptimizer(optimizerOptions);
+
+        iterationChart.series[0].setData([], true);
+        iterationChart.series[1].setData([], true);
+        iterationChart.series[2].setData([], true);
+
+        tourChart.series[0].setData([], true);
+
+        result = optimizer.optimize();
+
+        optimizerOptions.combinatorialFunction.twoOpt(result.x);
+
+        for (i = 0; i < nodeList.length; i++) {
+            tourChart.series[0].addPoint([nodeList[result.x[i]].x, nodeList[result.x[i]].y]);
+        }
+    }
+
+    $(document).ready(function() {
+        iterationChart = new Highcharts.Chart({
+            chart: {
+                renderTo: "iteration-chart",
+                defaultSeriesType: "line"
+            },
+            title: {
+                text: "Optimization Progress"
+            },
+            xAxis: {
+                title: {text: "Iteration"}
+            },
+            yAxis: {
+                title: {text: "Objective Value"}
+            },
+            series: [
+                {name: "min"},
+                {name: "mean"},
+                {name: "max"}
+            ]
+        });
+
+        tourChart = new Highcharts.Chart({
+            chart: {
+                renderTo: "tour-chart",
+                defaultSeriesType: "scatter"
+            },
+            title: {
+                text: "Optimized Tour"
+            },
+            xAxis: {
+                title: {text: "x"}
+            },
+            yAxis: {
+                title: {text: "y"}
+            },
+            plotOptions: {
+                series: {lineWidth: 1}
+            },
+            series: [
+                {name: "tour"}
+            ]
+        });
+
+        $("#optimize").click(Optimize);
+    });
+</script>
+
+<body>
+    <label for="populationSize">Population Size:</label>
+    <input type="text" name="populationSize" id="populationSize" value="100"/><br />
+    <label for="iterationLimit">Iteration Limit:</label>
+    <input type="text" name="iterationLimit" id="iterationLimit" value="1000"/><br />
+    <label for="improvementIterationLimit">Improvement Iteration Limit:</label>
+    <input type="text" name="improvementIterationLimit" id="improvementIterationLimit" value="100"/><br />
+    <label for="timeLimit">Time Limit (ms):</label>
+    <input type="text" name="timeLimit" id="timeLimit" value="10000"/><br />
+    <label for="mutationProbability">Mutation Probability:</label>
+    <input type="text" name="mutationProbability" id="mutationProbability" value="0.1"/><br />
+    <label for="crossoverProbability">Crossover Probability:</label>
+    <input type="text" name="crossoverProbability" id="crossoverProbability" value="0.8"/><br />
+    <label for="statusCallbackInterval">Status Callback Interval:</label>
+    <input type="text" name="statusCallbackInterval" id="statusCallbackInterval" value="10"/><br />
+
+    <button id="optimize">Optimize</button>
+    <div id="iteration-chart" style="height: 500px; width: 800px;"></div>
+    <div id="tour-chart" style="height: 400px; width: 400px;"></div>
+</body>
+</html>
