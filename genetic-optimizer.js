@@ -189,7 +189,7 @@ GeneticOptimizer.prototype.scalePopulation = function (minValue, maxValue, meanV
 
     valueRange = maxValue - minValue;
 
-    if (valueRange === 0) {
+    if (valueRange == 0) {
         for (i = 0; i < this.options.populationSize; i++) {
             this.population[i].scaledValue = 1.0;
         }
@@ -213,7 +213,7 @@ GeneticOptimizer.prototype.updateIncumbent = function (newIncumbent) {
 GeneticOptimizer.prototype.evaluatePopulation = function () {
     var i, cumulativeValue, minValue, maxValue, totalValue, meanValue, minIndividual, maxIndividual, populationSize;
 
-    populationSize = this.options.populationSize
+    populationSize = this.options.populationSize;
 
 	this.population[0].value = this.options.combinatorialFunction.getValue(this.population[0].x);
 
@@ -270,7 +270,7 @@ GeneticOptimizer.prototype.breedNewGeneration = function () {
     var newPopulation, i, p1, p2, newP1, newP2, populationSize;
     
     newPopulation = [];
-	populationSize = this.options.populationSize
+	populationSize = this.options.populationSize;
 
     for (i = 0; i < populationSize; i += 2) {
         p1 = this.getIndividualFromPopulation();
