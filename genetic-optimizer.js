@@ -1,82 +1,3 @@
-function CombinatorialFunction(options) {
-    this.variableCount = options.variableCount;
-    this.variableUBound = options.variableUBound;
-}
-
-CombinatorialFunction.prototype.getValue = function (x) {
-    var i, result;
-
-    result = 0;
-    for (i = 0; i < this.variableCount; i++) {
-        result += x[i];
-    }
-
-    return result;
-};
-
-CombinatorialFunction.prototype.mutate = function (x) {
-    var i;
-
-    i = Math.floor(Math.random() * this.variableCount);
-    x[i] = Math.floor(Math.random() * (this.variableUBound[i] + 1));
-};
-
-CombinatorialFunction.prototype.getRandomIndividual = function () {
-    var i, result;
-
-    result = [];
-    for (i = 0; i < this.variableCount; i++) {
-        result[i] = Math.floor(Math.random() * (this.variableUBound[i] + 1));
-    }
-
-    return result;
-};
-
-CombinatorialFunction.prototype.crossoverSingle = function (x1, x2) {
-    var i, crossPoint, t;
-
-    crossPoint = Math.floor(Math.random() * this.variableCount);
-
-    for (i = crossPoint; i < this.variableCount; i++) {
-        t = x1[i];
-        x1[i] = x2[i];
-        x2[i] = t;
-    }
-};
-
-CombinatorialFunction.prototype.crossoverDouble = function (x1, x2) {
-    var i, crossPoint1, crossPoint2, t;
-
-    crossPoint1 = Math.floor(Math.random() * this.variableCount);
-    crossPoint2 = Math.floor(Math.random() * this.variableCount);
-
-    if (crossPoint2 < crossPoint1) {
-        t = crossPoint1;
-        crossPoint1 = crossPoint2;
-        crossPoint2 = t;
-    }
-
-    for (i = crossPoint1; i <= crossPoint2; i++) {
-        t = x1[i];
-        x1[i] = x2[i];
-        x2[i] = t;
-    }
-};
-
-CombinatorialFunction.prototype.crossoverMerge = function (x1, x2) {
-    var i, t;
-
-    for (i = 0; i < this.variableCount; i++) {
-        if (Math.random() < 0.5) {
-            t = x1[i];
-            x1[i] = x2[i];
-            x2[i] = t;
-        }
-    }
-};
-
-CombinatorialFunction.prototype.crossover = CombinatorialFunction.prototype.crossoverSingle;
-
 function GeneticOptimizer(options) {
 	var defaults, iProperty;
 	
@@ -122,12 +43,14 @@ function GeneticOptimizer(options) {
 }
 
 GeneticOptimizer.prototype.initializePopulation = function () {
-    var i;
+    var i, length, uBound;
 
     this.population = [];
+	length = this.options.combinatorialFunction.variableCount;
+	uBound = this.options.combinatorialFunction.variableUBound
 
     for (i = 0; i < this.options.populationSize; i++) {
-        this.population[i] = new GeneticOptimizer.GeneticIndividual(this.options.combinatorialFunction.getRandomIndividual());
+        this.population[i] = new GeneticOptimizer.GeneticIndividual(this.options.combinatorialFunction.getRandomIndividual(length, uBound));
     }
 };
 
@@ -267,10 +190,11 @@ GeneticOptimizer.prototype.evaluatePopulation = function () {
 };
 
 GeneticOptimizer.prototype.breedNewGeneration = function () {
-    var newPopulation, i, p1, p2, newP1, newP2, populationSize;
+    var newPopulation, i, p1, p2, newP1, newP2, populationSize, nVariables;
     
     newPopulation = [];
 	populationSize = this.options.populationSize;
+	nVariables = this.options.combinatorialFunction.variableCount;
 
     for (i = 0; i < populationSize; i += 2) {
         p1 = this.getIndividualFromPopulation();
@@ -280,15 +204,15 @@ GeneticOptimizer.prototype.breedNewGeneration = function () {
         newP2 = new GeneticOptimizer.GeneticIndividual(p2.x.slice());
 
         if (Math.random() <= this.options.crossoverProbability) {
-            this.options.combinatorialFunction.crossover(newP1.x, newP2.x);
+            this.options.combinatorialFunction.crossover(newP1.x, newP2.x, nVariables);
         }
 
         if (Math.random() <= this.options.mutationProbability) {
-            this.options.combinatorialFunction.mutate(newP1.x);
+            this.options.combinatorialFunction.mutate(newP1.x, nVariables, this.options.combinatorialFunction.variableUBound);
         }
 
         if (Math.random() <= this.options.mutationProbability) {
-            this.options.combinatorialFunction.mutate(newP2.x);
+            this.options.combinatorialFunction.mutate(newP2.x, nVariables, this.options.combinatorialFunction.variableUBound);
         }
 
         newPopulation[i] = newP1;
@@ -299,7 +223,7 @@ GeneticOptimizer.prototype.breedNewGeneration = function () {
     this.population = newPopulation;
 };
 
-GeneticOptimizer.prototype.getWeightedIndividual = function () {
+GeneticOptimizer.prototype.getIndividualWeighted = function () {
     var r;
 
     r = Math.random() * this.population[this.options.populationSize - 1].cumulativeScaledValue;
@@ -307,11 +231,11 @@ GeneticOptimizer.prototype.getWeightedIndividual = function () {
 
 };
 
-GeneticOptimizer.prototype.getTournamentIndividual = function () {
+GeneticOptimizer.prototype.getIndividualTournament = function () {
     var p1, p2;
 
-    p1 = this.getWeightedIndividual();
-    p2 = this.getWeightedIndividual();
+    p1 = this.getIndividualWeighted();
+    p2 = this.getIndividualWeighted();
 
     if (p1.value > p2.value) {
         return this.options.objective === "maximize" ? p1:p2;
@@ -319,7 +243,8 @@ GeneticOptimizer.prototype.getTournamentIndividual = function () {
         return this.options.objective === "maximize" ? p2:p1;
     }
 };
-GeneticOptimizer.prototype.getRandomIndividual = function () {
+
+GeneticOptimizer.prototype.getIndividualRandom = function () {
     var i;
 
     i = Math.floor(Math.random() * this.options.populationSize);
@@ -327,7 +252,7 @@ GeneticOptimizer.prototype.getRandomIndividual = function () {
 
 };
 
-GeneticOptimizer.prototype.getIndividualFromPopulation = GeneticOptimizer.prototype.getTournamentIndividual;
+GeneticOptimizer.prototype.getIndividualFromPopulation = GeneticOptimizer.prototype.getIndividualTournament;
 
 GeneticOptimizer.GeneticIndividual = function (x) {
 	this.x = x;
@@ -391,4 +316,67 @@ GeneticOptimizer.arraySeekLowerBound = function (array, key, keyFunction) {
 		return array[kHi];
 	}
     return array[kLo];
+};
+
+
+GeneticOptimizer.crossoverSingle = function (x1, x2, length) {
+    var i, crossPoint, t;
+
+    crossPoint = Math.floor(Math.random() * length);
+
+    for (i = crossPoint; i < length; i++) {
+        t = x1[i];
+        x1[i] = x2[i];
+        x2[i] = t;
+    }
+};
+
+GeneticOptimizer.crossoverDouble = function (x1, x2, length) {
+    var i, crossPoint1, crossPoint2, t;
+
+    crossPoint1 = Math.floor(Math.random() * length);
+    crossPoint2 = Math.floor(Math.random() * length);
+
+    if (crossPoint2 < crossPoint1) {
+        t = crossPoint1;
+        crossPoint1 = crossPoint2;
+        crossPoint2 = t;
+    }
+
+    for (i = crossPoint1; i <= crossPoint2; i++) {
+        t = x1[i];
+        x1[i] = x2[i];
+        x2[i] = t;
+    }
+};
+
+GeneticOptimizer.crossoverMerge = function (x1, x2, length) {
+    var i, t;
+
+    for (i = 0; i < length; i++) {
+        if (Math.random() < 0.5) {
+            t = x1[i];
+            x1[i] = x2[i];
+            x2[i] = t;
+        }
+    }
+};
+
+GeneticOptimizer.mutateBasic = function (x, length, uBound) {
+	var i;
+
+	i = Math.floor(Math.random() * length);
+	x[i] = Math.floor(Math.random() * (uBound[i] + 1));
+};
+
+
+GeneticOptimizer.getRandomIndividualBasic = function (length, uBound) {
+    var i, result;
+
+    result = new Array(length);
+    for (i = 0; i < length; i++) {
+        result[i] = Math.floor(Math.random() * (uBound[i] + 1));
+    }
+
+    return result;
 };

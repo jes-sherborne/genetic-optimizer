@@ -39,35 +39,35 @@ SimpleTSP.prototype.getValue = function (x) {
     return result;
 };
 
-SimpleTSP.prototype.mutate = function (x) {
+SimpleTSP.prototype.mutate = function (x, length, uBound) {
     var i, j, t;
 
-    i = Math.floor(Math.random() * this.variableCount);
-    j = Math.floor(Math.random() * this.variableCount);
+    i = Math.floor(Math.random() * length);
+    j = Math.floor(Math.random() * length);
     t = x[i];
     x[i] = x[j];
     x[j] = t;
 };
 
-SimpleTSP.prototype.getRandomIndividual = function () {
-    var i, result, sampler;
+SimpleTSP.prototype.getRandomIndividual = function (length, uBound) {
+    var sampler;
 
     sampler = new SampleWithoutReplacement(this.eachVariableList);
     return sampler.getAllItems();
 
 };
 
-SimpleTSP.prototype.crossover = function (x1, x2) {
+SimpleTSP.prototype.crossover = function (x1, x2, length) {
     var crossPoint, x1Copy;
 
-    crossPoint = Math.floor(Math.random() * this.variableCount);
-    x1Copy = x1.slice(); //We need to keep a clean copy, becuase we change it in place
+    crossPoint = Math.floor(Math.random() * length);
+    x1Copy = x1.slice(); //We need to keep a clean copy, because we change it in place
 
-    this.crossoverMerge(x1, x2, crossPoint);
-    this.crossoverMerge(x2, x1Copy, crossPoint);
+    this.crossoverMerge(x1, x2, length, crossPoint);
+    this.crossoverMerge(x2, x1Copy, length, crossPoint);
 };
 
-SimpleTSP.prototype.crossoverMerge = function (x1, x2, crossPoint) {
+SimpleTSP.prototype.crossoverMerge = function (x1, x2, length, crossPoint) {
     var i, j, t, isLocationUsed;
 
     /*  Merges x2 onto x1 starting at crossPoint
@@ -87,13 +87,13 @@ SimpleTSP.prototype.crossoverMerge = function (x1, x2, crossPoint) {
      */
 
 
-    isLocationUsed = new Array(x1.length);
+    isLocationUsed = new Array(length);
     for (i = 0; i < crossPoint; i++) {
         isLocationUsed[x1[i]] = true;
     }
 
     j = crossPoint;
-    for (i = 0; i < (x1.length); i++) {
+    for (i = 0; i < (length); i++) {
         t = x2[i];
         if (!isLocationUsed[t]) {
             x1[j] = t;

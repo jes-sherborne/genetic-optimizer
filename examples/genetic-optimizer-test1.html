@@ -17,12 +17,25 @@
     }
 
     function Optimize() {
-        var optimizer, result, optimizerOptions;
+        var optimizer, testFunction, result, optimizerOptions;
+
+        testFunction = {
+            variableCount: 10,
+            variableUBound: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+            getValue: function (x) {
+                var i, result = 0;
+                for (i = 0; i < this.variableCount; i++) {
+                    result += x[i];
+                }
+                return result;
+            },
+            getRandomIndividual: GeneticOptimizer.getRandomIndividualBasic,
+            mutate: GeneticOptimizer.mutateBasic,
+            crossover: GeneticOptimizer.crossoverMerge
+        };
 
         optimizerOptions = {
-            combinatorialFunction: new CombinatorialFunction({
-                variableCount: 40,
-                variableUBound: [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40]}),
+            combinatorialFunction: testFunction,
             objective: "minimize",
             statusCallback: updateStatus
         };
