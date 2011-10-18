@@ -2,11 +2,11 @@
 
 This is a JavaScript library that implements a genetic optimization algorithm. Genetic algorithms (GAs) attempt to find the optimal value of a function using a technique modelled after the biological process of natural selection. Unlike many other optimization methods which only work on specific kinds of functions (e.g., continuous, differentiable, etc.), GAs make no assumptions about the behavior of the function that they're optimizing. Genetic algorithms are well suited to combinatorial optimization problems, especially those where the variables interact in a complicated way.
 
-While GAs cannot generate a provable optimum (although they may well find the optimum value), they are useful when you want to find a pretty good solution quickly.
+While GAs cannot generate a provable optimum (although they may find the optimum value), they are useful when you want to find a pretty good solution quickly.
 
 ## Getting Started
 
-To use GeneticOptimizer, you write a simple object to represent your objective function and pass it to the optimizer. GeneticOptimizer includes a handful of built-in functions to make this easier. In may cases, all you will need to do is write the objective function itself and set a few options.
+To use GeneticOptimizer, you write a simple object to represent your objective function and pass it to the optimizer. GeneticOptimizer includes a handful of built-in functions to make this easier. In many cases, all you will need to do is write the objective function itself and set a few options.
 
     myFunction = {
         variableCount: 3,
@@ -26,7 +26,7 @@ To use GeneticOptimizer, you write a simple object to represent your objective f
 
 ### Required settings for your objective function
 
-GeneticOptimizer can attempt to optimize any object, provided that it implements the following properties and methods
+GeneticOptimizer can attempt to optimize any object that implements the following properties and methods.
 
 #### variableCount
 
@@ -50,13 +50,13 @@ The actual objective function. x[] is an array of integers, and the function mus
 
 #### getRandomIndividual
 
-This function is called repeatedly to create the initial random population that the optimizer evolves over successive generations. After the initial population is created, it is never called again. GeneticOptimizer includes a default implementation (`GeneticOptimizer.getRandomIndividualBasic`) that selects a random value for each x[i] between 0 and its upper bound.
+This function is called repeatedly to create the initial random population that the optimizer evolves over successive generations. After GeneticOptimizer creates the initial population, it never calls this function again. GeneticOptimizer includes a default implementation (`GeneticOptimizer.getRandomIndividualBasic`) that selects a random value for each x[i] between 0 and its upper bound.
 
     myFunction.getRandomIndividual = GeneticOptimizer.getRandomIndividualBasic;
 
 #### mutate
 
-Takes a given individual and alters it. It is modeled after biological mutation, and in a genetic algorithm, it serves to broaden the search space. GeneticOptimizer includes a built-in mutation function that replaces one variable with a random value between 0 and its upper bound.
+Takes a given individual and alters it. The mutation operator is modeled after biological mutation, and in a genetic algorithm, it serves to broaden the search space. GeneticOptimizer includes a built-in mutation function that replaces one variable with a random value between 0 and its upper bound.
 
     myFunction.mutate = GeneticOptimizer.mutateBasic;
 
@@ -72,17 +72,17 @@ Takes two parent individuals (arrays of integers) and combines them to produce t
 
 ### GeneticOptimizer options
 
-GeneticOptimizer has a handful of options that you can change to affect the optimization. In practice, you will generally need to experiment with several values until you find ones that give you the right balance of speed and solution quality.
+GeneticOptimizer has a handful of options that you can change to affect the optimization. In practice, you should experiment with several values until you find ones that give you the right balance of speed and solution quality.
 
 * __populationSize__ (integer; default: 100): The size of the population that is evolved over time. In general, a larger population size will take longer to run but will explore a broader range of possibilities.
-* __iterationLimit__ (integer; default: 1000): The maximum number of iterations that the algorithm will try. Each iteration represents a successive generation of the population, where individuals are selected for breeding an produce offspring which are then evaluated for fitness.
+* __iterationLimit__ (integer; default: 1000): The maximum number of iterations that the algorithm will try. Each iteration represents a successive generation of the population, where individuals are selected for breeding and produce offspring which are then evaluated for fitness.
 * __timeLimit__ (integer; default: 5000): the maximum running time of the algorithm in milliseconds. It does not include the time taken by postprocessing.
 * __mutationProbability__ (float; range 0.0 - 1.0; default: 0.02): the probability that an individual in a generation will have a mutation (as implemented by the `mutate` function. Higher mutation values tend to broaden the search by introducing new variations into the population. Lower values lead the algorithm to converge to a solution more quickly.
 * __crossoverProbability__ (float; range 0.0 - 1.0; default: 0.6): the probability that a pair of individuals selected for breeding will produce offspring using the `crossover function`. Otherwise, the two selected individuals pass to the next generation unmodified, except potentially by mutation (see above).
 * __improvementIterationLimit__ (integer; default: 500): the algorithm will terminate if it has gone for this many iterations without making any progress toward a better solution.
 * __combinatorialFunction__ (object; default: null): The function to be optimized (see above).
 * __objective__ (string; "maximize" or "minimize"; default: "maximize") Whether the function should be maximized or minimized.
-* __statusCallbackInterval__ (integer; default: 1): How often to call the status callback function (see below), if present. a value of 1 means that it will be called every generation. A value of 2 means that it will be called every other iteration, and so on. The function will also be called whenever an improved solution is found.
+* __statusCallbackInterval__ (integer; default: 1): How often to call the status callback function if present (see below). A value of 1 means that it will be called every generation. A value of 2 means that it will be called every other generation, and so on. GeneticOptimizer will also call the function whenever it finds an improved solution.
 
 ### Getting status updates from the optimization
 
@@ -135,7 +135,7 @@ Here is an example of a function that generates new individuals where each varia
 
 ### Writing your own mutation function
 
-A mutation function takes an existing individual and changes it in a random way. You may want to write your own mutation function if there are combinations of values x[] that are not valid. By writing your own mutation function, you can ensure that all offspring remain valid. In the travelling salesman example, each variable represents a location on a tour, and we must visit each location exactly once.
+A mutation function takes an existing individual and changes it in a random way. You may want to write your own mutation function if there are combinations of values x[] that are not valid. By writing your own mutation function, you can ensure that all mutations yield a valid individual. In the travelling salesman example, each variable represents a location on a tour, and we must visit each location exactly once.
 
 You can also use the mutation function to introduce a periodic heuristic to improve the solution. For example, you might use it to run a local search on randomly selected individuals from time to time.
 
