@@ -89,6 +89,7 @@ GeneticOptimizer has a handful of options that you can change to affect the opti
 Since running a genetic optimization can be time-consuming, GeneticOptimizer has callback hooks (set on the options object that is passed to GeneticOptimizer when it is initialized) that give you updates on the algorithm's progress. It is called every _statusCallbackInterval_ iterations or whenever an improved solution (i.e., an _incumbent_) is found.
 
 The status callback function takes one argument, a status object with the following properties:
+
 * __iteration__ (integer): the current iteration (generation) number for the algorithm
 * __newIncumbent__ (boolean): did the algorithm find an improved solution?
 * __populationMin__ (float): the minimum value of the objective function within the current population
