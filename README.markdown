@@ -108,13 +108,13 @@ The examples use the status callback function to create graphs that show the pro
 
 ## Advanced topics: writing custom behaviors and operators
 
-While there are many problems that can be solved quite well using nothing but the built-in functions, other problems have special characteristics that can benefit from exercising more control over the implementation of the genetic algorithm. The travelling salesman example gives a practical example of how and why to do this.
+While GeneticOptimizer can solve many problems using nothing but the built-in functions, other problems have special characteristics that benefit from exercising more control. The travelling salesman example gives a practical example of how and why you might do this.
 
 ### Writing your own initial population generator
 
-If you want to control how GeneticOptimizer creates the starting population (which it will evolve over time), you can write your own function to do so. One common reason to do this is to avoid invalid combinations of variables. In the travelling salesman example, each variable represents a location on a tour, each of which must be visited exactly once. In that case, we've modified getRandomIndividual so that it gives a randomly selected, but valid, tour.
+You can write your own function to control how GeneticOptimizer creates the starting population. One common reason to do this is to avoid invalid combinations of variables. In the travelling salesman example, each variable represents a location on a tour, each of which must be visited exactly once, so we created a custom getRandomIndividual function that gives a randomly selected, but valid, tour.
 
-When writing your won generator function, you should take care that it covers the solution space as completely as possible. In other words, the function should be able to generate all possible valid individuals with equal probability.
+When writing your generator function, you should take care that it covers the solution space completely and evenly. In other words, the function should be able to generate all possible valid individuals with equal probability.
 
 Here is an example of a function that generates new individuals where each variable is either zero or its upper bound. This is likely to be a very poor generation function, but it does illustrate how they work.
 
@@ -155,7 +155,7 @@ In the travelling salesman problem, the mutation function swaps two locations in
 
 ### Writing your own crossover function
 
-You may want to write your own crossover function, especially if there are combinations of values x[] that are not valid. By writing your own crossover function, you can ensure that all offspring remain valid. In the travelling salesman example, each variable represents a location on a tour, and we must visit each location exactly once.
+You may want to write your own crossover function, especially if there are combinations of values x[] that are not valid. By writing your own crossover function, you could ensure that all offspring remain valid. In the travelling salesman example, each variable represents a location on a tour, and we must visit each location exactly once, so we wrote a custom crossover function to preserve this characteristic.
 
 While the travelling salesman problem's crossover function is somewhat involved, here is a simpler example which always crosses over at exactly the midpoint.
 
@@ -173,4 +173,4 @@ While the travelling salesman problem's crossover function is somewhat involved,
 
 ### Improving your solution with postprocessing
 
-Genetic algorithms are often very good at finding a nearly optimal solution, but sometimes it makes sense to explore solutions in the neighborhood of the optimum to see if any better solutions are nearby. If your function includes a postprocessing routine, GeneticOptimizer will call it at the end of the optimization to attempt to improve the solution. The travelling salesman example uses TwoOpt (a well-known heuristic for improving travelling salesman tours) as a postprocessing step.
+Genetic algorithms are often very good at finding a nearly optimal solution, so sometimes it makes sense to explore solutions in the neighborhood of the optimum to see if better solutions are nearby. If your function includes a postprocessing routine, GeneticOptimizer will call it at the end of the optimization to attempt to improve the solution. The travelling salesman example uses TwoOpt (a well-known heuristic for improving travelling salesman tours) as a postprocessing step.
