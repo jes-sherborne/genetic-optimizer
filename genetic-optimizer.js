@@ -1,5 +1,5 @@
 function GeneticOptimizer(options) {
-	var defaults, iProperty;
+	var defaults, kProperty;
 	
 	// Public properties
 
@@ -28,15 +28,15 @@ function GeneticOptimizer(options) {
 	
 	// Process options
 
-    for (iProperty in defaults) {
-        if (defaults.hasOwnProperty(iProperty)) {
-            this.options[iProperty] = defaults[iProperty];
+    for (kProperty in defaults) {
+        if (defaults.hasOwnProperty(kProperty)) {
+            this.options[kProperty] = defaults[kProperty];
         }
     }
 
-    for (iProperty in options) {
-        if (options.hasOwnProperty(iProperty)) {
-            this.options[iProperty] = options[iProperty];
+    for (kProperty in options) {
+        if (options.hasOwnProperty(kProperty)) {
+            this.options[kProperty] = options[kProperty];
         }
     }
 
@@ -47,7 +47,7 @@ GeneticOptimizer.prototype.initializePopulation = function () {
 
     this.population = [];
 	length = this.options.combinatorialFunction.variableCount;
-	uBound = this.options.combinatorialFunction.variableUBound
+	uBound = this.options.combinatorialFunction.variableUBound;
 
     for (i = 0; i < this.options.populationSize; i++) {
         this.population[i] = new GeneticOptimizer.GeneticIndividual(this.options.combinatorialFunction.getRandomIndividual(length, uBound));
