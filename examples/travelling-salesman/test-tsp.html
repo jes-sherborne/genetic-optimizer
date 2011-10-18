@@ -51,8 +51,6 @@
 
         result = optimizer.optimize();
 
-        optimizerOptions.combinatorialFunction.twoOpt(result.x);
-
         for (i = 0; i < nodeList.length; i++) {
             tourChart.series[0].addPoint([nodeList[result.x[i]].x, nodeList[result.x[i]].y]);
         }

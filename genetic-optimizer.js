@@ -100,7 +100,10 @@ GeneticOptimizer.prototype.optimize = function () {
     if (!result.stoppingCriteria) {
         result.stoppingCriteria = "iterationLimit"
     }
-    result.value = this.incumbent.value;
+
+	this.postProcessIncumbent();
+
+	result.value = this.incumbent.value;
     result.x = this.incumbent.x.slice();
     result.lastImprovedIteration = lastImprovedIteration;
 
@@ -221,6 +224,21 @@ GeneticOptimizer.prototype.breedNewGeneration = function () {
     }
 
     this.population = newPopulation;
+};
+
+GeneticOptimizer.prototype.postProcessIncumbent = function () {
+	var postProcessIndividual;
+
+	if (this.incumbent && this.options.combinatorialFunction.postProcess) {
+		postProcessIndividual = new GeneticOptimizer.GeneticIndividual(this.incumbent.x.slice());
+		this.options.combinatorialFunction.postProcess(postProcessIndividual.x);
+		postProcessIndividual.value = this.options.combinatorialFunction.getValue(postProcessIndividual.x);
+		if ((this.options.objective === "minimize") && (this.incumbent.value > postProcessIndividual.value)) {
+			this.updateIncumbent(postProcessIndividual);
+		} else if ((this.options.objective === "maximize") && (this.incumbent.value < postProcessIndividual.value)) {
+			this.updateIncumbent(postProcessIndividual);
+		}
+	}
 };
 
 GeneticOptimizer.prototype.getIndividualWeighted = function () {

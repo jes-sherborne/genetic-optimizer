@@ -3,14 +3,15 @@ function SimpleTSP(options) {
 
     this.variableCount = options.nodeList.length;
     this.node = options.nodeList.slice();
-    this.eachVariableList = []; //Just an array value for each variable. We use it for sampleWithoutReplacement
-    this.nodeDistance = null; //The distance from node to node
+	this.nodeDistance = null; //The distance from node to node
 
+    this.eachVariableList = []; // We precompute an array with a value for each variable to speed up getRandomIndividual
     for (i = 0; i < this.variableCount; i++) {
         this.eachVariableList.push(i);
     }
 
-    this.nodeDistance = new Array(this.variableCount);
+    // To speed up calculations, we precompute the distance between all pairs of locations
+	this.nodeDistance = new Array(this.variableCount);
     for (i = 0; i < this.variableCount; i++) {
         this.nodeDistance[i] = new Array(this.variableCount);
         for (j = 0; j < this.variableCount; j++) {
@@ -29,10 +30,11 @@ SimpleTSP.prototype.getDistance = function (node1, node2) {
 };
 
 SimpleTSP.prototype.getValue = function (x) {
-    var i, result;
+    var i, result, length;
 
     result = 0;
-    for (i = 1; i < this.variableCount; i++) {
+	length = this.variableCount;
+    for (i = 1; i < length; i++) {
         result += this.nodeDistance[x[i]][x[i - 1]];
     }
 
@@ -42,7 +44,9 @@ SimpleTSP.prototype.getValue = function (x) {
 SimpleTSP.prototype.mutate = function (x, length, uBound) {
     var i, j, t;
 
-    i = Math.floor(Math.random() * length);
+    // swaps two locations at random
+
+	i = Math.floor(Math.random() * length);
     j = Math.floor(Math.random() * length);
     t = x[i];
     x[i] = x[j];
@@ -63,11 +67,11 @@ SimpleTSP.prototype.crossover = function (x1, x2, length) {
     crossPoint = Math.floor(Math.random() * length);
     x1Copy = x1.slice(); //We need to keep a clean copy, because we change it in place
 
-    this.crossoverMerge(x1, x2, length, crossPoint);
-    this.crossoverMerge(x2, x1Copy, length, crossPoint);
+    this.crossoverInternal(x1, x2, length, crossPoint);
+    this.crossoverInternal(x2, x1Copy, length, crossPoint);
 };
 
-SimpleTSP.prototype.crossoverMerge = function (x1, x2, length, crossPoint) {
+SimpleTSP.prototype.crossoverInternal = function (x1, x2, length, crossPoint) {
     var i, j, t, isLocationUsed;
 
     /*  Merges x2 onto x1 starting at crossPoint
@@ -102,10 +106,16 @@ SimpleTSP.prototype.crossoverMerge = function (x1, x2, length, crossPoint) {
     }
 };
 
-SimpleTSP.prototype.twoOpt = function (x) {
+SimpleTSP.prototype.postProcess = function (x) {
     var iCheckStart, iCheckEnd, iSwap, t, changeMade, iCheckStartBest, iCheckEndBest, bestChange, thisChange;
 
-    changeMade = true;
+    /* Improves a tour using the TwoOpt heuristic. While this is not strictly a part of the genetic algorithm,
+    it highlights and important point, which is that it is often worthwhile to use a local search heuristic after
+    the genetic optimizer finishes. Essentially, this uses the genetic algorithm to find the right neighborhood for
+    a solution and then attempts to improve it.
+    */
+
+	changeMade = true;
     while (changeMade) {
         changeMade = false;
         for (iCheckStart = 0; iCheckStart < x.length - 3; iCheckStart++) {
