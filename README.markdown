@@ -155,7 +155,7 @@ In the travelling salesman problem, the mutation function swaps two locations in
 
 ### Writing your own crossover function
 
-You may want to write your own crossover function, especially if there are combinations of values x[] that are not valid. By writing your own crossover function, you could ensure that all offspring remain valid. In the travelling salesman example, each variable represents a location on a tour, and we must visit each location exactly once, so we wrote a custom crossover function to preserve this characteristic.
+You may want to write your own crossover function, especially if there are combinations of values x[] that are not valid. By writing your own crossover function, you can ensure that all offspring remain valid. In the travelling salesman example, each variable represents a location on a tour, and we must visit each location exactly once, so we need a custom crossover function to preserve this characteristic.
 
 While the travelling salesman problem's crossover function is somewhat involved, here is a simpler example which always crosses over at exactly the midpoint.
 
